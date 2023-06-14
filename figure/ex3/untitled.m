@@ -1,0 +1,120 @@
+[X,fs] = audioread('G:\FFOutput\temple.wav');
+
+ts= 1/fs;
+
+N = length(X)-1;
+
+t= 0:1/fs:N/fs;
+
+Nfft= N;
+
+df= fs/Nfft;
+
+fk= (-Nfft/2:Nfft/2-1) * df;
+
+subplot(211)
+
+t_range=[0,350,-2,2];
+
+plot(t, X);
+
+axis(t_range);
+
+Original_f= ts * fftshift(fft(X, N ));
+
+subplot(212)
+
+f_range=[-4000,4000,0,0.6];
+
+plot(fk, Original_f);
+
+axis(f_range);
+
+%对信号进行采样
+
+%采样频率为22kHz
+
+deX = resample(X, 22000, 44100);
+
+ts = 1/22000;
+
+N = length(deX)-1;
+
+t= 0:1/fs:N/fs;
+
+Nfft= N;
+
+df= fs/Nfft;
+
+fk= (-Nfft/2:Nfft/2-1) * df;
+
+figure(2)
+
+subplot(211)
+
+t_range=[0,200,-2,2];
+
+plot(t, deX); 
+
+axis(t_range);
+
+deX_f= ts * fftshift(fft(deX, N ));
+
+subplot(212)
+
+f_range=[-8000,8000,0,0.6];
+
+plot(fk, deX_f);
+
+axis(f_range); %对信号进行重构
+
+% BP=fir1(300,006000/fs/2));
+
+% reX = filter(BP, 1, deOrginal_f);
+
+% reX_sound = ift(reX);
+
+BP=fir1(300,[100,6000]/(fs/2));
+
+reX = filter(BP, 1, deX);
+
+reX = resample(reX, 44100, 22000);
+
+ts= 1/22000;
+
+N = length(reX)-1;
+
+t = 0:1/fs:N/fs;
+
+Nfft= N;
+
+df= fs/Nfft;
+
+sound(reX, fs);
+
+fk= (-Nfft/2:Nfft/2-1)*df;
+
+figure(3)
+
+plot(t, reX);title('重构信号');
+
+reX_f=ts * fftshift(fft( reX, N ));
+
+figure(4)
+
+f_range=[-4000,4000,0,0.6];
+
+plot(fk, reX_f);
+
+axis(f_range); 
+
+%采样前和采样后的振幅相减
+
+reX = reX(1:N-1,:); 
+
+de_re=X-reX;
+
+figure(5) 
+
+plot(t(:,1:N-1), de_re);title('重构误差');
+
